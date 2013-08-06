@@ -1,0 +1,148 @@
+#!/bin/bash
+
+#     Created by Louis Teboul (a.k.a Androguide.fr) 
+#     admin@androguide.fr
+#     http://androguide.fr // http://pimpmyrom.org
+#
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+CYAN="\\033[1;36m"
+RED="\\033[1;31m"
+GREEN="\\033[1;32m"
+RESET="\\e[0m"
+
+echo -e "${CYAN}Removing existing OpenJDK/IcedTea install if any...${RESET}"
+sudo apt-get purge openjdk-\* icedtea-\* icedtea6-\*
+
+echo -e "${CYAN}Installing Sun JDK 1.6...${RESET}"
+sudo add-apt-repository "deb http://archive.canonical.com/ lucid partner"
+sudo apt-get update
+sudo apt-get install sun-java6-jdk
+
+echo -e "${CYAN}Installing required packages...${RESET}"
+sudo apt-get install libssl1.0.0 libssl-dev git git-core gnupg flex bison gperf build-essential \
+  zip curl zlib1g-dev zlib1g-dev:i386 libc6-dev lib32ncurses5-dev \
+  ia32-libs x11proto-core-dev libx11-dev:i386 libreadline6-dev:i386 \
+  lib32z-dev libgl1-mesa-dev g++-multilib mingw32 \
+  tofrodos python-markdown libxml2-utils xsltproc readline-common \
+  libreadline6-dev libreadline6 lib32readline-gplv2-dev libncurses5-dev \
+  lib32readline5 lib32readline6 libreadline-dev libreadline6-dev:i386 \
+  libreadline6:i386 bzip2 libbz2-dev libbz2-1.0 libghc-bzlib-dev lib32bz2-dev \
+  libsdl1.2-dev libesd0-dev squashfs-tools pngcrush schedtool python
+
+echo -e "${CYAN}Symlinking libGL...${RESET}"
+sudo ln -s /usr/lib/i386-linux-gnu/mesa/libGL.so.1 /usr/lib/i386-linux-gnu/libGL.so
+
+echo -e -n "${CYAN}Please enter your username:${RESET}
+"
+read input
+
+echo -e "${CYAN}Configuring USB Access for $input...${RESET}"
+sudo touch /etc/udev/rules.d/51-android.rules
+sudo chmod a+r /etc/udev/rules.d/51-android.rules
+sudo chown $input /etc/udev/rules.d/51-android.rules
+sudo echo "#Garmin-Asus
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"091E\", MODE=\"0666\"
+#Google
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"18d1\", MODE=\"0666\"
+#HTC
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"0bb4\", MODE=\"0666\"
+#Huawei
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"12d1\", MODE=\"0666\"
+#K-Touch
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"24e3\", MODE=\"0666\"
+#KT Tech
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"2116\", MODE=\"0666\"
+#Kyocera
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"0482\", MODE=\"0666\"
+#Lenevo
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"17EF\", MODE=\"0666\"
+#LG
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"1004\", MODE=\"0666\"
+#Motorola
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"22b8\", MODE=\"0666\"
+#NEC
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"0409\", MODE=\"0666\"
+#Nook
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"2080\", MODE=\"0666\"
+#Nvidia
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"0955\", MODE=\"0666\"
+#OTGV
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"2257\", MODE=\"0666\"
+#Pantech
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"10A9\", MODE=\"0666\"
+#Philips
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"0471\", MODE=\"0666\"
+#PMC-Sierra
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"04da\", MODE=\"0666\"
+#Qualcomm
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"05c6\", MODE=\"0666\"
+#SK Telesys
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"1f53\", MODE=\"0666\"
+#Samsung
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"04e8\", MODE=\"0666\"
+#Sharp
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"04dd\", MODE=\"0666\"
+#Sony Ericsson
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"0fce\", MODE=\"0666\"
+#Toshiba
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"0930\", MODE=\"0666\"
+#ZTE
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"19D2\", MODE=\"0666\"
+# adb protocol on passion (Nexus One)
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"18d1\", ATTR{idProduct}==\"4e12\", MODE=\"0600\", OWNER=\"$input\"
+# fastboot protocol on passion (Nexus One)
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"0bb4\", ATTR{idProduct}==\"0fff\", MODE=\"0600\", OWNER=\"$input\"
+# adb protocol on crespo/crespo4g (Nexus S)
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"18d1\", ATTR{idProduct}==\"4e22\", MODE=\"0600\", OWNER=\"$input\"
+# fastboot protocol on crespo/crespo4g (Nexus S)
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"18d1\", ATTR{idProduct}==\"4e20\", MODE=\"0600\", OWNER=\"$input\"
+# adb protocol on stingray/wingray (Xoom)
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"22b8\", ATTR{idProduct}==\"70a9\", MODE=\"0600\", OWNER=\"$input\"
+# fastboot protocol on stingray/wingray (Xoom)
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"18d1\", ATTR{idProduct}==\"708c\", MODE=\"0600\", OWNER=\"$input\"
+# adb protocol on maguro/toro (Galaxy Nexus)
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"04e8\", ATTR{idProduct}==\"6860\", MODE=\"0600\", OWNER=\"$input\"
+# fastboot protocol on maguro/toro (Galaxy Nexus)
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"18d1\", ATTR{idProduct}==\"4e30\", MODE=\"0600\", OWNER=\"$input\"
+# adb protocol on panda (PandaBoard)
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"0451\", ATTR{idProduct}==\"d101\", MODE=\"0600\", OWNER=\"$input\"
+# fastboot protocol on panda (PandaBoard)
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"0451\", ATTR{idProduct}==\"d022\", MODE=\"0600\", OWNER=\"$input\"
+# usbboot protocol on panda (PandaBoard)
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"0451\", ATTR{idProduct}==\"d00f\", MODE=\"0600\", OWNER=\"$input\"
+# usbboot protocol on panda (PandaBoard ES)
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"0451\", ATTR{idProduct}==\"d010\", MODE=\"0600\", OWNER=\"$input\"
+# adb protocol on grouper/tilapia (Nexus 7)
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"18d1\", ATTR{idProduct}==\"4e42\", MODE=\"0600\", OWNER=\"$input\"
+# fastboot protocol on grouper/tilapia (Nexus 7)
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"18d1\", ATTR{idProduct}==\"4e40\", MODE=\"0600\", OWNER=\"$input\"
+# adb protocol on manta (Nexus 10)
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"18d1\", ATTR{idProduct}==\"4ee2\", MODE=\"0600\", OWNER=\"$input\"
+# fastboot protocol on manta (Nexus 10)
+SUBSYSTEM==\"usb\", ATTR{idVendor}==\"18d1\", ATTR{idProduct}==\"4ee0\", MODE=\"0600\", OWNER=\"$input\"" >> /etc/udev/rules.d/51-android.rules
+
+echo -e "${CYAN}Setting-up CCACHE support...${RESET}"
+sudo echo "export USE_CCACHE=1" >> ~/.bashrc
+
+echo -e "${CYAN}Installing ADB & Fastboot...${RESET}"
+sudo add-apt-repository ppa:phablet-team/tools
+sudo apt-get update
+sudo apt-get install android-tools-adb android-tools-fastboot
+
+echo -e "${GREEN}Success! Your build environment is now properly setup!${RESET}"
